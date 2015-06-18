@@ -7,8 +7,7 @@ This decoder can read the following DICOM transfer syntaxes:
 - 1.2.840.10008.1.2.4.57    JPEG Lossless, Nonhierarchical (Processes 14)
 - 1.2.840.10008.1.2.4.70    JPEG Lossless, Nonhierarchical (Processes 14 [Selection 1])
 
-Usage
------
+###Usage
 See tests/driver.js to run this example:
 
 ```javascript
@@ -16,6 +15,11 @@ var decoder = new jpeg.lossless.Decoder(compressedBytes);  // optional second pa
 var decompressedData = decoder.decode();
 ```
 
-Acknowledgments
------
+###Acknowledgments
 This library was originally written by Helmut Dersch for Java, later released by JNode.  I added support for selection values 2 to 7 and ported to JavaScript.
+
+###Building
+```shell
+./build.sh # normal build
+./build-min.sh # minimized build
+```
