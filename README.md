@@ -15,11 +15,11 @@ var decoder = new jpeg.lossless.Decoder(compressedBytes);  // optional second pa
 var decompressedData = decoder.decode();
 ```
 
-###Acknowledgments
-This library was originally written by Helmut Dersch for Java, later released by JNode.  I added support for selection values 2 to 7 and ported to JavaScript.
-
 ###Building
 ```shell
 ./build.sh # normal build
 ./build-min.sh # minimized build
 ```
+
+###Acknowledgments
+This library was originally written by Helmut Dersch for Java, later released by JNode.  I added support for selection values 2 to 7 and ported to JavaScript.
