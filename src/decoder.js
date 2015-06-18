@@ -68,12 +68,17 @@ jpeg.lossless.Decoder = jpeg.lossless.Decoder || function (buffer, numBytes) {
     this.xLoc = 0;
     this.yLoc = 0;
     this.outputData = null;
-    this.numBytes = numBytes;
 
-    if (numBytes === 2) {
+    if (typeof numBytes === "undefined") {
+        this.numBytes = 2;
+    } else {
+        this.numBytes = numBytes;
+    }
+
+    if (this.numBytes === 2) {
         this.getter = this.getValue16;
         this.setter = this.setValue16;
-    } else if (numBytes === 1) {
+    } else if (this.numBytes === 1) {
         this.getter = this.getValue8;
         this.setter = this.setValue8;
     }
