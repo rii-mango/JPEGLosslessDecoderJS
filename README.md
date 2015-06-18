@@ -9,6 +9,8 @@ This decoder can read the following DICOM transfer syntaxes:
 
 Usage
 -----
+See tests/driver.js to run this example:
+
 ```javascript
 var decoder = new jpeg.lossless.Decoder(compressedBytes);  // optional second parameter to specify 1 or 2 byte output
 var decompressedData = decoder.decode();
