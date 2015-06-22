@@ -22,4 +22,4 @@ var decompressedData = decoder.decode();
 ```
 
 ###Acknowledgments
-This library was originally written by Helmut Dersch for Java, later released by JNode.  I added support for selection values 2 to 7 and ported to JavaScript.
+This decoder was originally written by Helmut Dersch for Java, later released by JNode.  I added support for selection values 2 to 7 and ported to JavaScript.
