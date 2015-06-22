@@ -362,7 +362,7 @@ jpeg.lossless.Decoder.prototype.decode = function () {
     current = this.stream.get16();
 
     if (current !== 0xFFD8) { // SOI
-        this.error = "Not a JPEG file";
+        throw new Error("Not a JPEG file");
     }
 
     current = this.stream.get16();
@@ -861,9 +861,11 @@ jpeg.lossless.Decoder.prototype.output = function (PRED) {
 };
 
 
+
 jpeg.lossless.Decoder.prototype.setValue16 = function (index, val) {
     this.outputData.setInt16(index * 2, val, true);
 };
+
 
 
 jpeg.lossless.Decoder.prototype.getValue16 = function (index) {
@@ -873,14 +875,15 @@ jpeg.lossless.Decoder.prototype.getValue16 = function (index) {
 
 
 jpeg.lossless.Decoder.prototype.setValue8 = function (index, val) {
-    this.outputData.setInt16(index, val, true);
+    this.outputData.setInt8(index, val);
 };
 
 
 
 jpeg.lossless.Decoder.prototype.getValue8 = function (index) {
-    return this.outputData.getInt16(index, true);
+    return this.outputData.getInt8(index);
 };
+
 
 
 jpeg.lossless.Decoder.prototype.readApp = function() {
