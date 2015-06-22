@@ -22,7 +22,13 @@ function toArrayBuffer(buffer) {
     return ab;
 }
 
-var buf = fs.readFileSync('./data/data.lossless');
+var jpegDataOffset = 1654;
+var jpegDataSize = 143474;
+
+var buf = new Buffer(jpegDataSize);
+
+var fd = fs.openSync('./data/jpeg_lossless_sel1.dcm', "r");
+fs.readSync(fd, buf, 0, buf.length, jpegDataOffset);
 var data = toArrayBuffer(buf);
 var decoder = new jpeg.lossless.Decoder(data);
 var output = decoder.decode();
