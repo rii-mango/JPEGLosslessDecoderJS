@@ -5,9 +5,7 @@ cd $DIR
 rm -rf build
 mkdir build
 
-cat LICENSE > build/lossless.js
-
-echo "var jpeg = jpeg || {};" >> build/lossless.js
+echo "var jpeg = jpeg || {};" > build/lossless.js
 echo "jpeg.lossless = jpeg.lossless || {};" >> build/lossless.js
 
 FILES=src/*.js
