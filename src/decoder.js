@@ -676,7 +676,7 @@ jpeg.lossless.Decoder.prototype.readNumber = function() {
 jpeg.lossless.Decoder.prototype.scaleIDCT = function (matrix) {
     /*jslint bitwise: true */
 
-    var p = [[]], t0, t1, t2, t3, i, src0, src1, src2, src3, src4, src5, src6, src7, det0, det1, det2, det3, det4,
+    var p = jpeg.lossless.Utils.createArray(8, 8), t0, t1, t2, t3, i, src0, src1, src2, src3, src4, src5, src6, src7, det0, det1, det2, det3, det4,
         det5, det6, det7, mindex = 0;
 
     for (i = 0; i < 8; i+=1) {
