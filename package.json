@@ -11,7 +11,7 @@
     "browserify": "*"
   },
   "scripts": {
-    "test": "tests/test-node.sh",
+    "test": "mocha tests/driver.js",
     "build": "browserify src/*.js -o build/lossless.js"
   },
   "repository": {
