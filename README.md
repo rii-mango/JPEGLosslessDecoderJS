@@ -22,7 +22,7 @@ npm test
 
 ###Building
 ```shell
-npm run build
+npm run build # builds for browser environment
 ```
 
 ###Acknowledgments
