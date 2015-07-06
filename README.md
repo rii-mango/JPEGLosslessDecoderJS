@@ -15,10 +15,14 @@ var decoder = new jpeg.lossless.Decoder(compressedBytes);  // optional second pa
 var decompressedData = decoder.decode();
 ```
 
+###Testing
+```
+npm test
+```
+
 ###Building
-```shell
-./build.sh # normal build
-./build-min.sh # minimized build
+```
+npm run browser
 ```
 
 ###Acknowledgments
