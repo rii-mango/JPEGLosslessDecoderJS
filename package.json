@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test": "mocha tests/driver.js",
-    "build": "browserify src/*.js -o build/lossless.js"
+    "browser": "browserify src/*.js -o build/lossless.js"
   },
   "repository": {
     "type": "git",
