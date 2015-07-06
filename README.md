@@ -16,12 +16,12 @@ var decompressedData = decoder.decode();
 ```
 
 ###Testing
-```shell
+```
 npm test
 ```
 
 ###Building
-```shell
+```
 npm run browser
 ```
 
