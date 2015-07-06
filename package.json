@@ -1,0 +1,34 @@
+{
+  "name": "JPEGLosslessDecoderJS",
+  "version": "1.0.0",
+  "description": "A JavaScript JPEG Lossless decoder.",
+  "main": "src/decoder.js",
+  "directories": {
+    "test": "tests"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "browserify": "*"
+  },
+  "scripts": {
+    "test": "tests/test-node.sh",
+    "build": "browserify src/*.js -o build/lossless.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rii-mango/JPEGLosslessDecoderJS.git"
+  },
+  "keywords": [
+    "JavaScript",
+    "JPEG",
+    "Lossless",
+    "Decoder",
+    "DICOM"
+  ],
+  "author": "Michael Martinez",
+  "license": "LGPL",
+  "bugs": {
+    "url": "https://github.com/rii-mango/JPEGLosslessDecoderJS/issues"
+  },
+  "homepage": "https://github.com/rii-mango/JPEGLosslessDecoderJS"
+}

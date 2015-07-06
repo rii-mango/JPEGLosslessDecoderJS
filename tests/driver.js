@@ -27,7 +27,7 @@ var jpegDataSize = 143474;
 
 var buf = new Buffer(jpegDataSize);
 
-var fd = fs.openSync('./data/jpeg_lossless_sel1.dcm', "r");
+var fd = fs.openSync('./tests/data/jpeg_lossless_sel1.dcm', "r");
 fs.readSync(fd, buf, 0, buf.length, jpegDataOffset);
 var data = toArrayBuffer(buf);
 var decoder = new jpeg.lossless.Decoder(data);
@@ -35,3 +35,23 @@ var output = decoder.decode();
 console.log("compressed size = " + data.byteLength);
 console.log("frame: dimX="+decoder.frame.dimX + " dimY=" + decoder.frame.dimY + " components=" + decoder.frame.numComp);
 console.log("decompressed size = " + output.byteLength);
+
+var assert = require("assert");
+
+describe('JPEGLosslessDecoderJS', function () {
+    it('dimX should equal 512', function () {
+        assert.equal(512, decoder.frame.dimX);
+    });
+
+    it('dimY should equal 400', function () {
+        assert.equal(400, decoder.frame.dimY);
+    });
+
+    it('number of components should be 1', function () {
+        assert.equal(1, decoder.frame.numComp);
+    });
+
+    it('decompressed size should be 409600', function () {
+        assert.equal(409600, output.byteLength);
+    });
+});
