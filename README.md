@@ -21,7 +21,7 @@ npm test
 ```
 
 ###Building
-See the [release folder](https://github.com/rii-mango/JPEGLosslessDecoderJS/tree/master/release) for the latest builds or build it yourself:
+See the [release folder](https://github.com/rii-mango/JPEGLosslessDecoderJS/tree/master/release) for the latest builds or build it yourself using:
 ```
 npm run browser
 ```
