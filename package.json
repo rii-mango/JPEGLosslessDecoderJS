@@ -8,11 +8,13 @@
   },
   "devDependencies": {
     "mocha": "*",
-    "browserify": "*"
+    "browserify": "*",
+    "uglifyjs": "*"
   },
   "scripts": {
     "test": "mocha tests/driver.js",
-    "browser": "browserify src/*.js -o build/lossless.js"
+    "build": "rm -rf build; mkdir build; browserify --standalone jpeg src/main.js -o build/lossless.js; uglifyjs build/lossless.js -o build/lossless-min.js",
+    "release": "rm release/current/*.js; cp build/*.js release/current/."
   },
   "repository": {
     "type": "git",

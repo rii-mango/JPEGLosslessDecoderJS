@@ -4,9 +4,8 @@
 
 "use strict";
 
-var jpeg = {};
-jpeg.lossless = {};
-jpeg.lossless.Decoder = require('../src/decoder.js');
+var jpeg = require('../src/main.js');
+
 
 var fs = require('fs');
 
@@ -32,12 +31,8 @@ fs.readSync(fd, buf, 0, buf.length, jpegDataOffset);
 var data = toArrayBuffer(buf);
 var decoder = new jpeg.lossless.Decoder(data);
 var output = decoder.decode();
-console.log("compressed size = " + data.byteLength);
-console.log("frame: dimX="+decoder.frame.dimX + " dimY=" + decoder.frame.dimY + " components=" + decoder.frame.numComp);
-console.log("decompressed size = " + output.byteLength);
 
 var assert = require("assert");
-
 describe('JPEGLosslessDecoderJS', function () {
     it('dimX should equal 512', function () {
         assert.equal(512, decoder.frame.dimX);
