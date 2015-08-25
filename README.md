@@ -27,5 +27,20 @@ npm run build
 ```
 This will output lossless.js and lossless-min.js to build/.
 
+###Bower
+
+This library is distributed via [bower](http://bower.io/) under the name jpeg-lossless-decoder-js.  Bower utilizes git's
+tagging mechanism to manage versions.  Each time a new version is released, the version should be tagged using git
+so it can be found by bower. After a new version is released and pushed to github, you can do the following:
+
+# tag the current head with a version number (e.g. 1.0.0)
+
+> git tag -a 1.0.0 -m "Version 1.0.0"
+
+# push the tags to github
+
+> git push origin master --tags
+
 ###Acknowledgments
 This decoder was originally written by Helmut Dersch for Java, later released by [JNode](https://github.com/jnode/jnode).  I added support for selection values 2 to 7 and ported to JavaScript.
+
