@@ -167,7 +167,7 @@ jpeg.lossless.HuffmanTable.prototype.buildHuffTable = function(tab, L, V) {
 
             if (k >= 256) {
                 if (k > 256) {
-                    this.error = "ERROR: Huffman table error(1)!";
+                    throw new Error("ERROR: Huffman table error(1)!");
                 }
 
                 k = 0;
