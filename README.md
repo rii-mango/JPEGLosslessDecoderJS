@@ -13,6 +13,11 @@ See tests/driver-sel1.js to run this example:
 ```javascript
 var decoder = new jpeg.lossless.Decoder();
 var decompressedData = decoder.decode(buffer [, offset [, length [, numBytes]]]);
+
+// {ArrayBuffer} buffer
+// {Number} offset offset into buffer (default = 0)
+// {Number} length length of buffer (default = end of JPEG block)
+// {Number} number of bytes per output unit (default = 2)
 ```
 
 ###Testing
