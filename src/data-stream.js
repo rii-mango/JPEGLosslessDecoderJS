@@ -39,8 +39,8 @@ jpeg.lossless = jpeg.lossless || {};
 
 
 /*** Constructor ***/
-jpeg.lossless.DataStream = jpeg.lossless.DataStream || function (data) {
-    this.buffer = new DataView(data);
+jpeg.lossless.DataStream = jpeg.lossless.DataStream || function (data, offset, length) {
+    this.buffer = new DataView(data, offset, length);
     this.index = 0;
 };
 

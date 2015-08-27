@@ -21,15 +21,19 @@ function toArrayBuffer(buffer) {
     return ab;
 }
 
-var jpegDataOffset = 1846;
-var jpegDataSize = 46642 - jpegDataOffset;
-var buf = fs.readFileSync('./tests/data/jpeg_lossless_sel6.dcm');
+var jpegDataOffset = 1848;
+var jpegDataSize = 50675 - jpegDataOffset;
+
+var buf = new Buffer(jpegDataSize);
+
+var fd = fs.openSync('./tests/data/jpeg_lossless_sel1.dcm', "r");
+fs.readSync(fd, buf, 0, buf.length, jpegDataOffset);
 var data = toArrayBuffer(buf);
-var decoder = new jpeg.lossless.Decoder();
-var output = decoder.decode(data, jpegDataOffset, jpegDataSize);
+var decoder = new jpeg.lossless.Decoder(data);
+var output = decoder.decode();
 
 var assert = require("assert");
-describe('driver-sel6', function () {
+describe('driver-sel1', function () {
     it('dimX should equal 256', function () {
         assert.equal(256, decoder.frame.dimX);
     });

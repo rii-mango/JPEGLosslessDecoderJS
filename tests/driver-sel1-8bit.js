@@ -23,14 +23,10 @@ function toArrayBuffer(buffer) {
 
 var jpegDataOffset = 1070;
 var jpegDataSize = 74137;
-
-var buf = new Buffer(jpegDataSize);
-
-var fd = fs.openSync('./tests/data/jpeg_lossless_sel1-8bit.dcm', "r");
-fs.readSync(fd, buf, 0, buf.length, jpegDataOffset);
+var buf = fs.readFileSync('./tests/data/jpeg_lossless_sel1-8bit.dcm');
 var data = toArrayBuffer(buf);
-var decoder = new jpeg.lossless.Decoder(data, 1);
-var output = decoder.decode();
+var decoder = new jpeg.lossless.Decoder();
+var output = decoder.decode(data, jpegDataOffset, jpegDataSize, 1);
 
 var assert = require("assert");
 describe('driver-sel1-8bit', function () {

@@ -46,7 +46,7 @@ jpeg.lossless.Utils = jpeg.lossless.Utils || ((typeof require !== 'undefined') ?
 
 /*** Constructor ***/
 jpeg.lossless.Decoder = jpeg.lossless.Decoder || function (buffer, numBytes) {
-    this.stream = new jpeg.lossless.DataStream(buffer);
+    this.buffer = buffer;
     this.frame = new jpeg.lossless.FrameHeader();
     this.huffTable = new jpeg.lossless.HuffmanTable();
     this.quantTable = new jpeg.lossless.QuantizationTable();
@@ -74,14 +74,6 @@ jpeg.lossless.Decoder = jpeg.lossless.Decoder || function (buffer, numBytes) {
     } else {
         this.numBytes = numBytes;
     }
-
-    if (this.numBytes === 2) {
-        this.getter = this.getValue16;
-        this.setter = this.setValue16;
-    } else if (this.numBytes === 1) {
-        this.getter = this.getValue8;
-        this.setter = this.setValue8;
-    }
 };
 
 
@@ -97,10 +89,29 @@ jpeg.lossless.Decoder.MSB = 0x80000000;
 
 /*** Prototype Methods ***/
 
-jpeg.lossless.Decoder.prototype.decode = function () {
+jpeg.lossless.Decoder.prototype.decode = function (buffer, offset, length, numBytes) {
     /*jslint bitwise: true */
 
     var current, scanNum = 0, pred = [], i, compN, temp = [], index = [], mcuNum;
+
+    if (typeof buffer !== "undefined") {
+        this.buffer = buffer;
+    }
+
+    if (typeof numBytes !== "undefined") {
+        this.numBytes = numBytes;
+    }
+
+    if (this.numBytes === 2) {
+        this.getter = this.getValue16;
+        this.setter = this.setValue16;
+    } else if (this.numBytes === 1) {
+        this.getter = this.getValue8;
+        this.setter = this.setValue8;
+    }
+
+    this.stream = new jpeg.lossless.DataStream(this.buffer, offset, length);
+    this.buffer = null;
 
     this.xLoc = 0;
     this.yLoc = 0;
