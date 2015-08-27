@@ -6,7 +6,7 @@
   "directories": {
     "test": "tests"
   },
-  "devDependencies": {
+  "dependencies": {
     "mocha": "*",
     "browserify": "*",
     "uglifyjs": "*"
@@ -27,8 +27,8 @@
     "Decoder",
     "DICOM"
   ],
-  "author": "Michael Martinez",
-  "license": "LGPL",
+  "author": ["Michael Martinez", "Helmut Dersch"],
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/rii-mango/JPEGLosslessDecoderJS/issues"
   },
