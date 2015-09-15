@@ -88,6 +88,12 @@ jpeg.lossless.Decoder.MSB = 0x80000000;
 
 /*** Prototype Methods ***/
 
+jpeg.lossless.Decoder.prototype.decompress = function (buffer, offset, length) {
+    return this.decode(buffer, offset, length).buffer;
+};
+
+
+
 jpeg.lossless.Decoder.prototype.decode = function (buffer, offset, length, numBytes) {
     /*jslint bitwise: true */
 
