@@ -26,7 +26,7 @@ var jpegDataSize = 74137;
 var buf = fs.readFileSync('./tests/data/jpeg_lossless_sel1-8bit.dcm');
 var data = toArrayBuffer(buf);
 var decoder = new jpeg.lossless.Decoder();
-var output = decoder.decode(data, jpegDataOffset, jpegDataSize, 1);
+var output = decoder.decode(data, jpegDataOffset, jpegDataSize);
 
 var assert = require("assert");
 describe('driver-sel1-8bit', function () {
