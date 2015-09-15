@@ -26,7 +26,7 @@ var jpegDataSize = 48267 - jpegDataOffset;
 var buf = fs.readFileSync('./tests/data/jpeg_lossless_sel2.dcm');
 var data = toArrayBuffer(buf);
 var decoder = new jpeg.lossless.Decoder();
-var output = decoder.decode(data, jpegDataOffset, jpegDataSize);
+var output = decoder.decompress(data, jpegDataOffset, jpegDataSize);
 
 var assert = require("assert");
 describe('driver-sel2', function () {
