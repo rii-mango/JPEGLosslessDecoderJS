@@ -220,7 +220,7 @@ jpeg.lossless.Decoder.prototype.decode = function (buffer, offset, length, numBy
         this.components = this.frame.components;
 
         if (!this.numBytes) {
-            this.numBytes = parseInt(this.precision / 8);
+            this.numBytes = parseInt(Math.ceil(this.precision / 8));
         }
 
         this.scan.read(this.stream);
