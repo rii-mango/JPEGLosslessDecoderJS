@@ -31,11 +31,15 @@ Get a packaged source file:
 
 Or install via [NPM](https://www.npmjs.com/):
 
-> npm install jpeg-lossless-decoder-js
+```
+npm install jpeg-lossless-decoder-js
+```
 
 Or install via [Bower](http://bower.io/):
 
-> bower install jpeg-lossless-decoder-js
+```
+bower install jpeg-lossless-decoder-js
+```
 
 ###Testing
 ```
