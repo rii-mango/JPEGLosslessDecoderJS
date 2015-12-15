@@ -36,4 +36,4 @@ npm run build
 This will output lossless.js and lossless-min.js to build/.
 
 ###Acknowledgments
-This decoder was originally written by Helmut Dersch for Java.  I added support for selection values 2 to 7 and ported to JavaScript.
+This decoder was originally written by Helmut Dersch for Java.  I added support for selection values 2 through 7, contributed bug fixes and ported to JavaScript.
