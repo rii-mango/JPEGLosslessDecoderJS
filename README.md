@@ -23,6 +23,20 @@ var output = decoder.decompress(buffer [, offset [, length]]);
 // {ArrayBuffer} output (size = cols * rows * bytesPerComponent * numComponents)
 ```
 
+###Install
+Get a packaged source file:
+
+* [lossless.js](https://raw.githubusercontent.com/rii-mango/JPEGLosslessDecoderJS/master/release/current/lossless.js)
+* [lossless-min.js](https://raw.githubusercontent.com/rii-mango/JPEGLosslessDecoderJS/master/release/current/lossless-min.js)
+
+Or install via [NPM](https://www.npmjs.com/):
+
+> npm install jpeg-lossless-decoder-js
+
+Or install via [Bower](http://bower.io/):
+
+> bower install jpeg-lossless-decoder-js
+
 ###Testing
 ```
 npm test
