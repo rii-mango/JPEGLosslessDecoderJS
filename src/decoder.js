@@ -70,6 +70,7 @@ jpeg.lossless.Decoder = jpeg.lossless.Decoder || function (buffer, numBytes) {
     this.numBytes = 0;
     this.outputData = null;
     this.restarting = false;
+    this.mask = 0;
 
     if (typeof numBytes !== "undefined") {
         this.numBytes = numBytes;
@@ -221,6 +222,12 @@ jpeg.lossless.Decoder.prototype.decode = function (buffer, offset, length, numBy
 
         if (!this.numBytes) {
             this.numBytes = parseInt(Math.ceil(this.precision / 8));
+        }
+
+        if (this.numBytes == 1) {
+            this.mask = 0xFF;
+        } else {
+            this.mask = 0xFFFF;
         }
 
         this.scan.read(this.stream);
@@ -702,7 +709,7 @@ jpeg.lossless.Decoder.prototype.isLastPixel = function () {
 
 jpeg.lossless.Decoder.prototype.outputSingle = function (PRED) {
     if ((this.xLoc < this.xDim) && (this.yLoc < this.yDim)) {
-        this.setter((((this.yLoc * this.xDim) + this.xLoc)), PRED[0]);
+        this.setter((((this.yLoc * this.xDim) + this.xLoc)), this.mask & PRED[0]);
 
         this.xLoc+=1;
 
