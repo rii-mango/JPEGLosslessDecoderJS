@@ -1,8 +1,8 @@
 {
   "name": "jpeg-lossless-decoder-js",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A JavaScript JPEG Lossless decoder.",
-  "main" : "release/1.2.2/lossless.js",
+  "main" : "release/1.2.3/lossless.js",
   "ignore": [
       "src",
       "tests",
