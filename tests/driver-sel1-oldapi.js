@@ -49,4 +49,9 @@ describe('driver-sel1', function () {
     it('decompressed size should be 131072', function () {
         assert.equal(131072, output.byteLength);
     });
+
+    it('data checksum should equal 3476557349', function () {
+        var checksum = jpeg.lossless.Utils.crc32(output);
+        assert.equal(checksum, 3476557349);
+    });
 });
