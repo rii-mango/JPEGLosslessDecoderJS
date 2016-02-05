@@ -1,6 +1,6 @@
 {
   "name": "jpeg-lossless-decoder-js",
-  "version": "1.2.3",
+  "version": "1.2.5",
   "description": "A JavaScript JPEG Lossless decoder.",
   "main": "src/main.js",
   "directories": {
@@ -27,7 +27,10 @@
     "Decoder",
     "DICOM"
   ],
-  "author": ["Michael Martinez", "Helmut Dersch"],
+  "author": [
+    "Michael Martinez",
+    "Helmut Dersch"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/rii-mango/JPEGLosslessDecoderJS/issues"
