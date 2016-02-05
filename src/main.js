@@ -3,7 +3,7 @@
 
 "use strict";
 
-/*** Imports  ***/
+/*** Imports ****/
 var jpeg = jpeg || {};
 jpeg.lossless = jpeg.lossless || {};
 jpeg.lossless.ComponentSpec = jpeg.lossless.ComponentSpec || ((typeof require !== 'undefined') ? require('./component-spec.js') : null);
