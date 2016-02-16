@@ -876,7 +876,7 @@ jpeg.lossless.Decoder.prototype.setValue16 = function (index, val) {
 
 
 jpeg.lossless.Decoder.prototype.getValue16 = function (index) {
-    return this.outputData.getInt16(index * 2, true);
+    return this.outputData.getInt16(index * 2, true) & this.mask;
 };
 
 
@@ -888,7 +888,7 @@ jpeg.lossless.Decoder.prototype.setValue8 = function (index, val) {
 
 
 jpeg.lossless.Decoder.prototype.getValue8 = function (index) {
-    return this.outputData.getInt8(index);
+    return this.outputData.getInt8(index) & this.mask;
 };
 
 
