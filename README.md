@@ -8,7 +8,7 @@ This decoder can read data from the following DICOM transfer syntaxes:
 - 1.2.840.10008.1.2.4.70    JPEG Lossless, Nonhierarchical (Processes 14 [Selection 1])
 
 ###Usage
-See tests/driver-sel1.js to run this example:
+[API](https://github.com/rii-mango/JPEGLosslessDecoderJS/wiki/API) and [more examples](https://github.com/rii-mango/JPEGLosslessDecoderJS/tree/master/tests)
 
 ```javascript
 var decoder = new jpeg.lossless.Decoder();
