@@ -4,8 +4,20 @@
 "use strict";
 
 /*** Imports ****/
+
+/**
+ * jpeg
+  * @type {*|{}}
+ */
 var jpeg = jpeg || {};
+
+/**
+ * jpeg.lossless
+ * @type {*|{}}
+ */
 jpeg.lossless = jpeg.lossless || {};
+
+
 jpeg.lossless.ComponentSpec = jpeg.lossless.ComponentSpec || ((typeof require !== 'undefined') ? require('./component-spec.js') : null);
 jpeg.lossless.DataStream = jpeg.lossless.DataStream || ((typeof require !== 'undefined') ? require('./data-stream.js') : null);
 jpeg.lossless.Decoder = jpeg.lossless.Decoder || ((typeof require !== 'undefined') ? require('./decoder.js') : null);

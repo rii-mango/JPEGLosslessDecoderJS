@@ -45,6 +45,15 @@ jpeg.lossless.Utils = jpeg.lossless.Utils || ((typeof require !== 'undefined') ?
 
 
 /*** Constructor ***/
+
+/**
+ * The Decoder constructor.
+ * @property {number} xDim - size of x dimension
+ * @property {number} yDim - size of y dimension
+ * @property {number} numComp - number of components
+ * @property {number} numBytes - number of bytes per component
+ * @type {Function}
+ */
 jpeg.lossless.Decoder = jpeg.lossless.Decoder || function (buffer, numBytes) {
     this.buffer = buffer;
     this.frame = new jpeg.lossless.FrameHeader();
@@ -91,6 +100,13 @@ jpeg.lossless.Decoder.RESTART_MARKER_END = 0xFFD7;
 
 /*** Prototype Methods ***/
 
+/**
+ * Returns decompressed data.
+ * @param {ArrayBuffer} buffer
+ * @param {number} [offset]
+ * @param {number} [length]
+ * @returns {ArrayBufer}
+ */
 jpeg.lossless.Decoder.prototype.decompress = function (buffer, offset, length) {
     return this.decode(buffer, offset, length).buffer;
 };
