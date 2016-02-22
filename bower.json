@@ -25,7 +25,9 @@
     "JPEG",
     "Lossless",
     "Decoder",
-    "DICOM"
+    "DICOM",
+    "1.2.840.10008.1.2.4.57",
+    "1.2.840.10008.1.2.4.70"
   ],
   "repository": {
     "type": "git",
