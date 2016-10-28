@@ -40,14 +40,17 @@ jpeg.lossless = jpeg.lossless || {};
 
 /*** Constructor ***/
 jpeg.lossless.DataStream = jpeg.lossless.DataStream || function (data, offset, length) {
-    this.buffer = new DataView(data, offset, length);
+    // Note: DataView is much slower than Int8Array
+    // this.buffer = new DataView(data, offset, length);
+    this.buffer = new Uint8Array(data, offset, length);
     this.index = 0;
 };
 
 
 
 jpeg.lossless.DataStream.prototype.get16 = function () {
-    var value = this.buffer.getUint16(this.index, false);
+    // var value = this.buffer.getUint16(this.index, false);
+    var value = (this.buffer[this.index] << 8) + this.buffer[this.index + 1]; // DataView is big-endian by default
     this.index += 2;
     return value;
 };
@@ -55,7 +58,8 @@ jpeg.lossless.DataStream.prototype.get16 = function () {
 
 
 jpeg.lossless.DataStream.prototype.get8 = function () {
-    var value = this.buffer.getUint8(this.index);
+    // var value = this.buffer.getUint8(this.index);
+    var value = this.buffer[this.index];
     this.index += 1;
     return value;
 };
