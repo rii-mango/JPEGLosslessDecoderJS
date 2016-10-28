@@ -97,14 +97,17 @@ jpeg.lossless = jpeg.lossless || {};
 
 /*** Constructor ***/
 jpeg.lossless.DataStream = jpeg.lossless.DataStream || function (data, offset, length) {
-    this.buffer = new DataView(data, offset, length);
+    // Note: DataView is much slower than Int8Array
+    // this.buffer = new DataView(data, offset, length);
+    this.buffer = new Uint8Array(data, offset, length);
     this.index = 0;
 };
 
 
 
 jpeg.lossless.DataStream.prototype.get16 = function () {
-    var value = this.buffer.getUint16(this.index, false);
+    // var value = this.buffer.getUint16(this.index, false);
+    var value = (this.buffer[this.index] << 8) + this.buffer[this.index + 1]; // DataView is big-endian by default
     this.index += 2;
     return value;
 };
@@ -112,7 +115,8 @@ jpeg.lossless.DataStream.prototype.get16 = function () {
 
 
 jpeg.lossless.DataStream.prototype.get8 = function () {
-    var value = this.buffer.getUint8(this.index);
+    // var value = this.buffer.getUint8(this.index);
+    var value = this.buffer[this.index];
     this.index += 1;
     return value;
 };
@@ -173,6 +177,15 @@ jpeg.lossless.Utils = jpeg.lossless.Utils || ((typeof require !== 'undefined') ?
 
 
 /*** Constructor ***/
+
+/**
+ * The Decoder constructor.
+ * @property {number} xDim - size of x dimension
+ * @property {number} yDim - size of y dimension
+ * @property {number} numComp - number of components
+ * @property {number} numBytes - number of bytes per component
+ * @type {Function}
+ */
 jpeg.lossless.Decoder = jpeg.lossless.Decoder || function (buffer, numBytes) {
     this.buffer = buffer;
     this.frame = new jpeg.lossless.FrameHeader();
@@ -219,6 +232,13 @@ jpeg.lossless.Decoder.RESTART_MARKER_END = 0xFFD7;
 
 /*** Prototype Methods ***/
 
+/**
+ * Returns decompressed data.
+ * @param {ArrayBuffer} buffer
+ * @param {number} [offset]
+ * @param {number} [length]
+ * @returns {ArrayBufer}
+ */
 jpeg.lossless.Decoder.prototype.decompress = function (buffer, offset, length) {
     return this.decode(buffer, offset, length).buffer;
 };
@@ -415,7 +435,11 @@ jpeg.lossless.Decoder.prototype.decode = function (buffer, offset, length, numBy
 
         this.xDim = this.frame.dimX;
         this.yDim = this.frame.dimY;
-        this.outputData = new DataView(new ArrayBuffer(this.xDim * this.yDim * this.numBytes * this.numComp));
+        if (this.numBytes == 1) {
+            this.outputData = new Int8Array(new ArrayBuffer(this.xDim * this.yDim * this.numBytes * this.numComp));
+        } else {
+            this.outputData = new Int16Array(new ArrayBuffer(this.xDim * this.yDim * this.numBytes * this.numComp));            
+        }
 
         scanNum+=1;
 
@@ -867,40 +891,46 @@ jpeg.lossless.Decoder.prototype.outputRGB = function (PRED) {
     }
 };
 
-
-
-jpeg.lossless.Decoder.prototype.setValue16 = function (index, val) {
-    this.outputData.setInt16(index * 2, val, true);
-};
-
-
-
-jpeg.lossless.Decoder.prototype.getValue16 = function (index) {
-    return this.outputData.getInt16(index * 2, true) & this.mask;
-};
-
-
-
 jpeg.lossless.Decoder.prototype.setValue8 = function (index, val) {
-    this.outputData.setInt8(index, val);
+    this.outputData[index] = val; 
 };
-
-
 
 jpeg.lossless.Decoder.prototype.getValue8 = function (index) {
-    return this.outputData.getInt8(index) & this.mask;
+    return this.outputData[index]; // mask should not be necessary because outputData is either Int8Array or Int16Array
 };
 
+var littleEndian = (function() {
+    var buffer = new ArrayBuffer(2);
+    new DataView(buffer).setInt16(0, 256, true /* littleEndian */);
+    // Int16Array uses the platform's endianness.
+    return new Int16Array(buffer)[0] === 256;
+})();
 
+if (littleEndian) {
+    // just reading from an array is fine then. Int16Array will use platform endianness.
+    jpeg.lossless.Decoder.prototype.setValue16 = jpeg.lossless.Decoder.prototype.setValue8; 
+    jpeg.lossless.Decoder.prototype.getValue16 = jpeg.lossless.Decoder.prototype.getValue8;
+} 
+else {
+    // If platform is big-endian, we will need to convert to little-endian 
+    jpeg.lossless.Decoder.prototype.setValue16 = function (index, val) {
+        this.outputData[index] = ((val & 0xFF) << 8) | ((val >> 8) & 0xFF); 
+    };
+
+    jpeg.lossless.Decoder.prototype.getValue16 = function (index) {
+        var val = this.outputData[index];
+        return ((val & 0xFF) << 8) | ((val >> 8) & 0xFF);
+    };
+}
 
 jpeg.lossless.Decoder.prototype.setValueRGB = function (index, val, compOffset) {
-    this.outputData.setUint8(index * 3 + compOffset, val);
+    // this.outputData.setUint8(index * 3 + compOffset, val);
+    this.outputData[index * 3 + compOffset] = val;
 };
 
-
-
 jpeg.lossless.Decoder.prototype.getValueRGB = function (index, compOffset) {
-    return this.outputData.getUint8(index * 3 + compOffset);
+    // return this.outputData.getUint8(index * 3 + compOffset);
+    return this.outputData[index * 3 + compOffset];
 };
 
 
@@ -1264,8 +1294,20 @@ if ((moduleType !== 'undefined') && module.exports) {
 "use strict";
 
 /*** Imports ****/
+
+/**
+ * jpeg
+  * @type {*|{}}
+ */
 var jpeg = jpeg || {};
+
+/**
+ * jpeg.lossless
+ * @type {*|{}}
+ */
 jpeg.lossless = jpeg.lossless || {};
+
+
 jpeg.lossless.ComponentSpec = jpeg.lossless.ComponentSpec || ((typeof require !== 'undefined') ? require('./component-spec.js') : null);
 jpeg.lossless.DataStream = jpeg.lossless.DataStream || ((typeof require !== 'undefined') ? require('./data-stream.js') : null);
 jpeg.lossless.Decoder = jpeg.lossless.Decoder || ((typeof require !== 'undefined') ? require('./decoder.js') : null);
@@ -1691,11 +1733,12 @@ jpeg.lossless.Utils.makeCRCTable = function(){
 };
 
 jpeg.lossless.Utils.crc32 = function(dataView) {
+    var uint8view = new Uint8Array(dataView.buffer);
     var crcTable = jpeg.lossless.Utils.crcTable || (jpeg.lossless.Utils.crcTable = jpeg.lossless.Utils.makeCRCTable());
     var crc = 0 ^ (-1);
 
-    for (var i = 0; i < dataView.byteLength; i++ ) {
-        crc = (crc >>> 8) ^ crcTable[(crc ^ dataView.getUint8(i)) & 0xFF];
+    for (var i = 0; i < uint8view.length; i++ ) {
+        crc = (crc >>> 8) ^ crcTable[(crc ^ uint8view[i]) & 0xFF];
     }
 
     return (crc ^ (-1)) >>> 0;
