@@ -73,11 +73,12 @@ jpeg.lossless.Utils.makeCRCTable = function(){
 };
 
 jpeg.lossless.Utils.crc32 = function(dataView) {
+    var uint8view = new Uint8Array(dataView.buffer);
     var crcTable = jpeg.lossless.Utils.crcTable || (jpeg.lossless.Utils.crcTable = jpeg.lossless.Utils.makeCRCTable());
     var crc = 0 ^ (-1);
 
-    for (var i = 0; i < dataView.byteLength; i++ ) {
-        crc = (crc >>> 8) ^ crcTable[(crc ^ dataView.getUint8(i)) & 0xFF];
+    for (var i = 0; i < uint8view.length; i++ ) {
+        crc = (crc >>> 8) ^ crcTable[(crc ^ uint8view[i]) & 0xFF];
     }
 
     return (crc ^ (-1)) >>> 0;

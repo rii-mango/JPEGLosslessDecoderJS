@@ -303,7 +303,11 @@ jpeg.lossless.Decoder.prototype.decode = function (buffer, offset, length, numBy
 
         this.xDim = this.frame.dimX;
         this.yDim = this.frame.dimY;
-        this.outputData = new DataView(new ArrayBuffer(this.xDim * this.yDim * this.numBytes * this.numComp));
+        if (this.numBytes == 1) {
+            this.outputData = new Int8Array(new ArrayBuffer(this.xDim * this.yDim * this.numBytes * this.numComp));
+        } else {
+            this.outputData = new Int16Array(new ArrayBuffer(this.xDim * this.yDim * this.numBytes * this.numComp));            
+        }
 
         scanNum+=1;
 
@@ -755,40 +759,46 @@ jpeg.lossless.Decoder.prototype.outputRGB = function (PRED) {
     }
 };
 
-
-
-jpeg.lossless.Decoder.prototype.setValue16 = function (index, val) {
-    this.outputData.setInt16(index * 2, val, true);
-};
-
-
-
-jpeg.lossless.Decoder.prototype.getValue16 = function (index) {
-    return this.outputData.getInt16(index * 2, true) & this.mask;
-};
-
-
-
 jpeg.lossless.Decoder.prototype.setValue8 = function (index, val) {
-    this.outputData.setInt8(index, val);
+    this.outputData[index] = val; 
 };
-
-
 
 jpeg.lossless.Decoder.prototype.getValue8 = function (index) {
-    return this.outputData.getInt8(index) & this.mask;
+    return this.outputData[index]; // mask should not be necessary because outputData is either Int8Array or Int16Array
 };
 
+var littleEndian = (function() {
+    var buffer = new ArrayBuffer(2);
+    new DataView(buffer).setInt16(0, 256, true /* littleEndian */);
+    // Int16Array uses the platform's endianness.
+    return new Int16Array(buffer)[0] === 256;
+})();
 
+if (littleEndian) {
+    // just reading from an array is fine then. Int16Array will use platform endianness.
+    jpeg.lossless.Decoder.prototype.setValue16 = jpeg.lossless.Decoder.prototype.setValue8; 
+    jpeg.lossless.Decoder.prototype.getValue16 = jpeg.lossless.Decoder.prototype.getValue8;
+} 
+else {
+    // If platform is big-endian, we will need to convert to little-endian 
+    jpeg.lossless.Decoder.prototype.setValue16 = function (index, val) {
+        this.outputData[index] = ((val & 0xFF) << 8) | ((val >> 8) & 0xFF); 
+    };
+
+    jpeg.lossless.Decoder.prototype.getValue16 = function (index) {
+        var val = this.outputData[index];
+        return ((val & 0xFF) << 8) | ((val >> 8) & 0xFF);
+    };
+}
 
 jpeg.lossless.Decoder.prototype.setValueRGB = function (index, val, compOffset) {
-    this.outputData.setUint8(index * 3 + compOffset, val);
+    // this.outputData.setUint8(index * 3 + compOffset, val);
+    this.outputData[index * 3 + compOffset] = val;
 };
 
-
-
 jpeg.lossless.Decoder.prototype.getValueRGB = function (index, compOffset) {
-    return this.outputData.getUint8(index * 3 + compOffset);
+    // return this.outputData.getUint8(index * 3 + compOffset);
+    return this.outputData[index * 3 + compOffset];
 };
 
 
