@@ -304,9 +304,9 @@ jpeg.lossless.Decoder.prototype.decode = function (buffer, offset, length, numBy
         this.xDim = this.frame.dimX;
         this.yDim = this.frame.dimY;
         if (this.numBytes == 1) {
-            this.outputData = new Int8Array(new ArrayBuffer(this.xDim * this.yDim * this.numBytes * this.numComp));
+            this.outputData = new Uint8Array(new ArrayBuffer(this.xDim * this.yDim * this.numBytes * this.numComp));
         } else {
-            this.outputData = new Int16Array(new ArrayBuffer(this.xDim * this.yDim * this.numBytes * this.numComp));            
+            this.outputData = new Uint16Array(new ArrayBuffer(this.xDim * this.yDim * this.numBytes * this.numComp));
         }
 
         scanNum+=1;
