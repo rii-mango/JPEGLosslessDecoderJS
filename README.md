@@ -7,7 +7,7 @@ This decoder can read data from the following DICOM transfer syntaxes:
 - 1.2.840.10008.1.2.4.57    JPEG Lossless, Nonhierarchical (Processes 14)
 - 1.2.840.10008.1.2.4.70    JPEG Lossless, Nonhierarchical (Processes 14 [Selection 1])
 
-###Usage
+### Usage
 [API](https://github.com/rii-mango/JPEGLosslessDecoderJS/wiki/API) and [more examples](https://github.com/rii-mango/JPEGLosslessDecoderJS/tree/master/tests)
 
 ```javascript
@@ -23,7 +23,7 @@ var output = decoder.decompress(buffer [, offset [, length]]);
 // {ArrayBuffer} output (size = cols * rows * bytesPerComponent * numComponents)
 ```
 
-###Install
+### Install
 Get a packaged source file:
 
 * [lossless.js](https://raw.githubusercontent.com/rii-mango/JPEGLosslessDecoderJS/master/release/current/lossless.js)
@@ -41,17 +41,17 @@ Or install via [Bower](http://bower.io/):
 bower install jpeg-lossless-decoder-js
 ```
 
-###Testing
+### Testing
 ```
 npm test
 ```
 
-###Building
+### Building
 See the [release folder](https://github.com/rii-mango/JPEGLosslessDecoderJS/tree/master/release) for the latest builds or build it yourself using:
 ```
 npm run build
 ```
 This will output lossless.js and lossless-min.js to build/.
 
-###Acknowledgments
+### Acknowledgments
 This decoder was originally written by Helmut Dersch for Java.  I added support for selection values 2 through 7, contributed bug fixes and ported to JavaScript.
