@@ -33,7 +33,7 @@ var decoder = new jpeg.lossless.Decoder(data);
 var output = decoder.decode();
 
 var assert = require("assert");
-describe('driver-sel1', function () {
+describe('driver-sel1-oldapi', function () {
     it('dimX should equal 256', function () {
         assert.equal(256, decoder.frame.dimX);
     });
