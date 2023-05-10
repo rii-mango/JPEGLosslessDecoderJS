@@ -35,12 +35,6 @@ Or install via [NPM](https://www.npmjs.com/):
 npm install jpeg-lossless-decoder-js
 ```
 
-Or install via [Bower](http://bower.io/):
-
-```
-bower install jpeg-lossless-decoder-js
-```
-
 ### Testing
 ```
 npm test
