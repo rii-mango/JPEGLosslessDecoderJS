@@ -1,5 +1,5 @@
 "use strict";
-(() => {
+var jpeg = (() => {
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
     get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
@@ -1171,5 +1171,5 @@
       }
     }
   });
-  require_main();
+  return require_main();
 })();
