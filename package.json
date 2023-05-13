@@ -1,6 +1,6 @@
 {
   "name": "jpeg-lossless-decoder-js",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "A JavaScript JPEG Lossless decoder.",
   "main": "src/main.js",
   "directories": {
@@ -9,11 +9,14 @@
   "devDependencies": {
     "mocha": "*",
     "esbuild": "*",
+    "browserify": "*",
+    "uglify-js": "*",
     "jsdoc-to-markdown": "*"
   },
   "scripts": {
     "test": "mocha tests",
-    "build": "rm -rf build; mkdir build; esbuild src/main.js --bundle --global-name=jpeg --outfile=build/lossless.js; esbuild src/main.js --bundle --global-name=jpeg --minify --outfile=build/lossless-min.js",
+    "esbuild": "rm -rf build; mkdir build; esbuild src/main.js --bundle --global-name=jpeg --outfile=build/lossless.js; esbuild src/main.js --bundle --global-name=jpeg --minify --outfile=build/lossless-min.js",
+    "build": "rm -rf build; mkdir build; browserify --standalone jpeg src/main.js -o build/lossless.js; uglifyjs build/lossless.js -o build/lossless-min.js",
     "release": "rm release/current/*.js; cp build/*.js release/current/.",
     "doc": "rm -rf build; mkdir build; ./node_modules/.bin/jsdoc2md src/*.js > build/docs.md"
   },
