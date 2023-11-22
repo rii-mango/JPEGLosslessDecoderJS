@@ -1,14 +1,16 @@
-// http://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript
-export const createArray = function (length) {
-  const arr = new Array(length || 0)
-  let i = length
-
-  if (arguments.length > 1) {
-    const args = Array.prototype.slice.call(arguments, 1)
-    while (i--) arr[length - 1 - i] = createArray.apply(this, args)
+// https://stackoverflow.com/a/12588826
+export const createArray = (...dimensions) => {
+  if (dimensions.length > 0) {
+    const dim = dimensions[0]
+    const rest = dimensions.slice(1)
+    const newArray = []
+    for (let i = 0; i < dim; i++) {
+      newArray[i] = createArray(...rest)
+    }
+    return newArray
+  } else {
+    return undefined
   }
-
-  return arr
 }
 
 // http://stackoverflow.com/questions/18638900/javascript-crc32
