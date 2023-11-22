@@ -1,28 +1,27 @@
+import { DataStream } from './data-stream.js'
 import { createArray } from './utils.js'
 
 export class HuffmanTable {
   static MSB = 0x80000000
-  constructor() {
-    this.l = createArray(4, 2, 16)
-    this.th = []
-    this.v = createArray(4, 2, 16, 200)
-    this.tc = createArray(4, 2)
 
-    this.tc[0][0] = 0
-    this.tc[1][0] = 0
-    this.tc[2][0] = 0
-    this.tc[3][0] = 0
-    this.tc[0][1] = 0
-    this.tc[1][1] = 0
-    this.tc[2][1] = 0
-    this.tc[3][1] = 0
-    this.th[0] = 0
-    this.th[1] = 0
-    this.th[2] = 0
-    this.th[3] = 0
+  l: number[][][]
+  th: number[]
+  v: number[][][][]
+  tc: number[][]
+
+  constructor() {
+    this.l = createArray(4, 2, 16) as number[][][]
+    this.th = [0, 0, 0, 0]
+    this.v = createArray(4, 2, 16, 200) as number[][][][]
+    this.tc = [
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0]
+    ]
   }
 
-  read(data, HuffTab) {
+  read(data: DataStream, HuffTab: number[][][]) {
     let count = 0
     let temp
     let t
@@ -88,7 +87,7 @@ export class HuffmanTable {
   //	            V[i][j] Huffman Value (length=i)
   //	Effect:
   //	    build up HuffTab[t][c] using L and V.
-  buildHuffTable(tab, L, V) {
+  buildHuffTable(tab: number[], L: number[], V: number[][]) {
     let currentTable, k, i, j, n
     const temp = 256
     k = 0

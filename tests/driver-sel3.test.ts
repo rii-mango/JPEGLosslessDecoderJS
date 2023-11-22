@@ -1,16 +1,16 @@
 import fs from 'fs'
-import assert from 'assert'
+import { describe, it, assert } from 'vitest'
 import { Utils, Decoder } from '../src/main.js'
 import { toArrayBuffer } from './utils.js'
 
-const jpegDataOffset = 1846
-const jpegDataSize = 46796 - jpegDataOffset
-const buf = fs.readFileSync('./tests/data/jpeg_lossless_sel7.dcm')
+const jpegDataOffset = 1848
+const jpegDataSize = 52185 - jpegDataOffset
+const buf = fs.readFileSync('./tests/data/jpeg_lossless_sel3.dcm')
 const data = toArrayBuffer(buf)
 const decoder = new Decoder()
 const output = decoder.decompress(data, jpegDataOffset, jpegDataSize)
 
-describe('driver-sel7', function () {
+describe('driver-sel3', function () {
   it('dimX should equal 256', function () {
     assert.equal(256, decoder.frame.dimX)
   })
@@ -28,7 +28,7 @@ describe('driver-sel7', function () {
   })
 
   it('data checksum should equal 3476557349', function () {
-    const checksum = Utils.crc32(new DataView(output))
+    const checksum = Utils.crc32(output)
     assert.equal(checksum, 3476557349)
   })
 })

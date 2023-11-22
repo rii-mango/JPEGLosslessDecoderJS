@@ -1,5 +1,5 @@
 import fs from 'fs'
-import assert from 'assert'
+import { describe, it, assert } from 'vitest'
 import { Utils, Decoder } from '../src/main.js'
 import { toArrayBuffer } from './utils.js'
 
@@ -28,7 +28,7 @@ describe('driver-sel1-8bit', function () {
   })
 
   it('data checksum should equal 2307286885', function () {
-    const checksum = Utils.crc32(new DataView(output))
+    const checksum = Utils.crc32(output)
     assert.equal(checksum, 2307286885)
   })
 })

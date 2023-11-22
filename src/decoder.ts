@@ -1,3 +1,4 @@
+import { ComponentSpec } from './component-spec.js'
 import { DataStream } from './data-stream.js'
 import { FrameHeader } from './frame-header.js'
 import { HuffmanTable } from './huffman-table.js'
@@ -30,59 +31,60 @@ export class Decoder {
   static RESTART_MARKER_BEGIN = 0xffd0
   static RESTART_MARKER_END = 0xffd7
 
+  buffer: ArrayBuffer | null = null
+  stream: DataStream | null = null
+  frame = new FrameHeader()
+  huffTable = new HuffmanTable()
+  quantTable = new QuantizationTable()
+  scan = new ScanHeader()
+  DU: number[][][] = createArray(10, 4, 64) as number[][][] // at most 10 data units in a MCU, at most 4 data units in one component
+  HuffTab: number[][][] = createArray(4, 2, 50 * 256) as number[][][]
+  IDCT_Source: number[] = []
+  nBlock: number[] = [] // number of blocks in the i-th Comp in a scan
+  acTab: number[][] = createArray(10, 1) as number[][] // ac HuffTab for the i-th Comp in a scan
+  dcTab: number[][] = createArray(10, 1) as number[][] // dc HuffTab for the i-th Comp in a scan
+  qTab: number[][] = createArray(10, 1) as number[][] // quantization table for the i-th Comp in a scan
+  marker = 0
+  markerIndex = 0
+  numComp = 0
+  restartInterval = 0
+  selection = 0
+  xDim = 0
+  yDim = 0
+  xLoc = 0
+  yLoc = 0
+  outputData: Uint8Array | Uint16Array | null = null
+  restarting = false
+  mask = 0
+  numBytes = 0
+
+  precision: number | undefined = undefined
+  components: Array<typeof ComponentSpec> = []
+
+  getter: null | ((index: number, compOffset: number) => number) = null
+  setter: null | ((index: number, val: number, compOffset?: number) => void) = null
+  output: null | ((PRED: number[]) => void) = null
+  selector: null | ((compOffset?: number) => number) = null
+
   /**
    * The Decoder constructor.
-   * @property {number} xDim - size of x dimension
-   * @property {number} yDim - size of y dimension
-   * @property {number} numComp - number of components
    * @property {number} numBytes - number of bytes per component
    * @type {Function}
    */
-  constructor(buffer, numBytes) {
-    this.buffer = buffer
-    this.frame = new FrameHeader()
-    this.huffTable = new HuffmanTable()
-    this.quantTable = new QuantizationTable()
-    this.scan = new ScanHeader()
-    this.DU = createArray(10, 4, 64) // at most 10 data units in a MCU, at most 4 data units in one component
-    this.HuffTab = createArray(4, 2, 50 * 256)
-    this.IDCT_Source = []
-    this.nBlock = [] // number of blocks in the i-th Comp in a scan
-    this.acTab = createArray(10, 1) // ac HuffTab for the i-th Comp in a scan
-    this.dcTab = createArray(10, 1) // dc HuffTab for the i-th Comp in a scan
-    this.qTab = createArray(10, 1) // quantization table for the i-th Comp in a scan
-    this.marker = 0
-    this.markerIndex = 0
-    this.numComp = 0
-    this.restartInterval = 0
-    this.selection = 0
-    this.xDim = 0
-    this.yDim = 0
-    this.xLoc = 0
-    this.yLoc = 0
-    this.numBytes = 0
-    this.outputData = null
-    this.restarting = false
-    this.mask = 0
-
-    if (typeof numBytes !== 'undefined') {
-      this.numBytes = numBytes
-    }
+  constructor(buffer?: ArrayBuffer | null, numBytes?: number) {
+    this.buffer = buffer ?? null
+    this.numBytes = numBytes ?? 0
   }
 
   /**
    * Returns decompressed data.
-   * @param {ArrayBuffer} buffer
-   * @param {number} [offset]
-   * @param {number} [length]
-   * @returns {ArrayBufer}
    */
-  decompress(buffer, offset, length) {
-    return this.decode(buffer, offset, length).buffer
+  decompress(buffer: ArrayBuffer, offset: number, length: number): ArrayBuffer {
+    const result = this.decode(buffer, offset, length)
+    return result.buffer
   }
 
-  decode(buffer, offset, length, numBytes) {
-    let current
+  decode(buffer?: ArrayBuffer, offset?: number, length?: number, numBytes?: number) {
     let scanNum = 0
     const pred = []
     let i
@@ -91,20 +93,20 @@ export class Decoder {
     const index = []
     let mcuNum
 
-    if (typeof buffer !== 'undefined') {
+    if (buffer) {
       this.buffer = buffer
     }
 
-    if (typeof numBytes !== 'undefined') {
+    if (numBytes !== undefined) {
       this.numBytes = numBytes
     }
 
-    this.stream = new DataStream(this.buffer, offset, length)
+    this.stream = new DataStream(this.buffer as ArrayBuffer, offset, length)
     this.buffer = null
 
     this.xLoc = 0
     this.yLoc = 0
-    current = this.stream.get16()
+    let current = this.stream.get16()
 
     if (current !== 0xffd8) {
       // SOI
@@ -125,7 +127,7 @@ export class Decoder {
           this.quantTable.read(this.stream, Decoder.TABLE)
           break
         case 0xffdd:
-          this.restartInterval = this.readNumber()
+          this.restartInterval = this.readNumber() ?? 0
           break
         case 0xffe0:
         case 0xffe1:
@@ -177,7 +179,7 @@ export class Decoder {
             this.quantTable.read(this.stream, Decoder.TABLE)
             break
           case 0xffdd:
-            this.restartInterval = this.readNumber()
+            this.restartInterval = this.readNumber() ?? 0
             break
           case 0xffe0:
           case 0xffe1:
@@ -213,7 +215,7 @@ export class Decoder {
       this.components = this.frame.components
 
       if (!this.numBytes) {
-        this.numBytes = parseInt(Math.ceil(this.precision / 8))
+        this.numBytes = Math.round(Math.ceil(this.precision / 8))
       }
 
       if (this.numBytes === 1) {
@@ -266,15 +268,15 @@ export class Decoder {
           break
       }
 
-      this.scanComps = this.scan.components
-      this.quantTables = this.quantTable.quantTables
+      // this.scanComps = this.scan.components
+      // this.quantTables = this.quantTable.quantTables
 
       for (i = 0; i < this.numComp; i += 1) {
-        compN = this.scanComps[i].scanCompSel
-        this.qTab[i] = this.quantTables[this.components[compN].quantTableSel]
+        compN = this.scan.components[i].scanCompSel
+        this.qTab[i] = this.quantTable.quantTables[this.components[compN].quantTableSel]
         this.nBlock[i] = this.components[compN].vSamp * this.components[compN].hSamp
-        this.dcTab[i] = this.HuffTab[this.scanComps[i].dcTabSel][0]
-        this.acTab[i] = this.HuffTab[this.scanComps[i].acTabSel][1]
+        this.dcTab[i] = this.HuffTab[this.scan.components[i].dcTabSel][0]
+        this.acTab[i] = this.HuffTab[this.scan.components[i].acTabSel][1]
       }
 
       this.xDim = this.frame.dimX
@@ -341,7 +343,7 @@ export class Decoder {
     return this.outputData
   }
 
-  decodeUnit(prev, temp, index) {
+  decodeUnit(prev: number[], temp: number[], index: number[]): number {
     if (this.numComp === 1) {
       return this.decodeSingle(prev, temp, index)
     } else if (this.numComp === 3) {
@@ -351,36 +353,38 @@ export class Decoder {
     }
   }
 
-  select1(compOffset) {
+  select1(compOffset?: number) {
     return this.getPreviousX(compOffset)
   }
 
-  select2(compOffset) {
+  select2(compOffset?: number) {
     return this.getPreviousY(compOffset)
   }
 
-  select3(compOffset) {
+  select3(compOffset?: number) {
     return this.getPreviousXY(compOffset)
   }
 
-  select4(compOffset) {
+  select4(compOffset?: number) {
     return this.getPreviousX(compOffset) + this.getPreviousY(compOffset) - this.getPreviousXY(compOffset)
   }
 
-  select5(compOffset) {
+  select5(compOffset?: number) {
     return this.getPreviousX(compOffset) + ((this.getPreviousY(compOffset) - this.getPreviousXY(compOffset)) >> 1)
   }
 
-  select6(compOffset) {
+  select6(compOffset?: number) {
     return this.getPreviousY(compOffset) + ((this.getPreviousX(compOffset) - this.getPreviousXY(compOffset)) >> 1)
   }
 
-  select7(compOffset) {
+  select7(compOffset?: number) {
     return (this.getPreviousX(compOffset) + this.getPreviousY(compOffset)) / 2
   }
 
-  decodeRGB(prev, temp, index) {
-    let value, actab, dctab, qtab, ctrC, i, k, j
+  decodeRGB(prev: number[], temp: number[], index: number[]) {
+    if (this.selector === null) throw new Error("decode hasn't run yet")
+
+    let actab, dctab, qtab, ctrC, i, k, j
 
     prev[0] = this.selector(0)
     prev[1] = this.selector(1)
@@ -395,7 +399,7 @@ export class Decoder {
           this.IDCT_Source[k] = 0
         }
 
-        value = this.getHuffmanValue(dctab, temp, index)
+        let value = this.getHuffmanValue(dctab, temp, index)
 
         if (value >= 0xff00) {
           return value
@@ -427,7 +431,9 @@ export class Decoder {
     return 0
   }
 
-  decodeSingle(prev, temp, index) {
+  decodeSingle(prev: number[], temp: number[], index: number[]) {
+    if (this.selector === null) throw new Error("decode hasn't run yet")
+
     let value, i, n, nRestart
 
     if (this.restarting) {
@@ -487,9 +493,11 @@ export class Decoder {
   //	        and marker_index=9
   //	      If marker_index=9 then index is always > 8, or HuffmanValue()
   //	        will not be called
-  getHuffmanValue(table, temp, index) {
+  getHuffmanValue(table: number[], temp: number[], index: number[]): number {
     let code, input
     const mask = 0xffff
+
+    if (!this.stream) throw new Error('stream not initialized')
 
     if (index[0] < 8) {
       temp[0] <<= 8
@@ -544,11 +552,13 @@ export class Decoder {
     return code & 0xff
   }
 
-  getn(PRED, n, temp, index) {
+  getn(PRED: number[], n: number, temp: number[], index: number[]) {
     let result, input
     const one = 1
     const n_one = -1
     const mask = 0xffff
+
+    if (this.stream === null) throw new Error('stream not initialized')
 
     if (n === 0) {
       return 0
@@ -627,7 +637,9 @@ export class Decoder {
     return result
   }
 
-  getPreviousX(compOffset) {
+  getPreviousX(compOffset = 0): number {
+    if (this.getter === null) throw new Error("decode hasn't run yet")
+
     if (this.xLoc > 0) {
       return this.getter(this.yLoc * this.xDim + this.xLoc - 1, compOffset)
     } else if (this.yLoc > 0) {
@@ -637,7 +649,9 @@ export class Decoder {
     }
   }
 
-  getPreviousXY(compOffset) {
+  getPreviousXY(compOffset = 0) {
+    if (this.getter === null) throw new Error("decode hasn't run yet")
+
     if (this.xLoc > 0 && this.yLoc > 0) {
       return this.getter((this.yLoc - 1) * this.xDim + this.xLoc - 1, compOffset)
     } else {
@@ -645,7 +659,9 @@ export class Decoder {
     }
   }
 
-  getPreviousY(compOffset) {
+  getPreviousY(compOffset = 0) {
+    if (this.getter === null) throw new Error("decode hasn't run yet")
+
     if (this.yLoc > 0) {
       return this.getter((this.yLoc - 1) * this.xDim + this.xLoc, compOffset)
     } else {
@@ -657,7 +673,9 @@ export class Decoder {
     return this.xLoc === this.xDim - 1 && this.yLoc === this.yDim - 1
   }
 
-  outputSingle(PRED) {
+  outputSingle(PRED: number[]) {
+    if (this.setter === null) throw new Error("decode hasn't run yet")
+
     if (this.xLoc < this.xDim && this.yLoc < this.yDim) {
       this.setter(this.yLoc * this.xDim + this.xLoc, this.mask & PRED[0])
 
@@ -670,7 +688,9 @@ export class Decoder {
     }
   }
 
-  outputRGB(PRED) {
+  outputRGB(PRED: number[]) {
+    if (this.setter === null) throw new Error("decode hasn't run yet")
+
     const offset = this.yLoc * this.xDim + this.xLoc
 
     if (this.xLoc < this.xDim && this.yLoc < this.yDim) {
@@ -687,7 +707,9 @@ export class Decoder {
     }
   }
 
-  setValue8(index, val) {
+  setValue8(index: number, val: number) {
+    if (!this.outputData) throw new Error('output data not ready')
+
     if (littleEndian) {
       this.outputData[index] = val
     } else {
@@ -695,7 +717,8 @@ export class Decoder {
     }
   }
 
-  getValue8(index) {
+  getValue8(index: number) {
+    if (this.outputData === null) throw new Error('output data not ready')
     if (littleEndian) {
       return this.outputData[index] // mask should not be necessary because outputData is either Int8Array or Int16Array
     } else {
@@ -704,17 +727,19 @@ export class Decoder {
     }
   }
 
-  setValueRGB(index, val, compOffset) {
-    // this.outputData.setUint8(index * 3 + compOffset, val);
+  setValueRGB(index: number, val: number, compOffset = 0) {
+    if (this.outputData === null) return
     this.outputData[index * 3 + compOffset] = val
   }
 
-  getValueRGB(index, compOffset) {
-    // return this.outputData.getUint8(index * 3 + compOffset);
+  getValueRGB(index: number, compOffset: number) {
+    if (this.outputData === null) throw new Error('output data not ready')
     return this.outputData[index * 3 + compOffset]
   }
 
   readApp() {
+    if (this.stream === null) return null
+
     let count = 0
     const length = this.stream.get16()
     count += 2
@@ -728,6 +753,8 @@ export class Decoder {
   }
 
   readComment() {
+    if (this.stream === null) return null
+
     let sb = ''
     let count = 0
 
@@ -743,6 +770,8 @@ export class Decoder {
   }
 
   readNumber() {
+    if (this.stream === null) return null
+
     const Ld = this.stream.get16()
 
     if (Ld !== 4) {

@@ -1,11 +1,12 @@
+import { DataStream } from './data-stream.js'
 import { createArray } from './utils.js'
 
 export class QuantizationTable {
-  precision = [] // Quantization precision 8 or 16
+  precision: number[] = [] // Quantization precision 8 or 16
   tq = [0, 0, 0, 0] // 1: this table is presented
-  quantTables = createArray(4, 64) // Tables
+  quantTables: number[][] = createArray(4, 64) as number[][] // Tables
 
-  static enhanceQuantizationTable = function (qtab, table) {
+  static enhanceQuantizationTable = function (qtab: number[], table: number[]) {
     for (let i = 0; i < 8; i += 1) {
       qtab[table[0 * 8 + i]] *= 90
       qtab[table[4 * 8 + i]] *= 90
@@ -33,7 +34,7 @@ export class QuantizationTable {
     }
   }
 
-  read(data, table) {
+  read(data: DataStream, table: number[]) {
     let count = 0
     let temp
     let t

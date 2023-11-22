@@ -1,20 +1,16 @@
 import fs from 'fs'
-import assert from 'assert'
+import { describe, it, assert } from 'vitest'
 import { Utils, Decoder } from '../src/main.js'
 import { toArrayBuffer } from './utils.js'
 
 const jpegDataOffset = 1848
-const jpegDataSize = 50675 - jpegDataOffset
-
-const buf = Buffer.alloc(jpegDataSize)
-
-const fd = fs.openSync('./tests/data/jpeg_lossless_sel1.dcm', 'r')
-fs.readSync(fd, buf, 0, buf.length, jpegDataOffset)
+const jpegDataSize = 47747 - jpegDataOffset
+const buf = fs.readFileSync('./tests/data/jpeg_lossless_sel5.dcm')
 const data = toArrayBuffer(buf)
-const decoder = new Decoder(data)
-const output = decoder.decode()
+const decoder = new Decoder()
+const output = decoder.decompress(data, jpegDataOffset, jpegDataSize)
 
-describe('driver-sel1-oldapi', function () {
+describe('driver-sel5', function () {
   it('dimX should equal 256', function () {
     assert.equal(256, decoder.frame.dimX)
   })

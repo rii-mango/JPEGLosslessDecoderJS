@@ -1,13 +1,14 @@
 import { ComponentSpec } from './component-spec.js'
+import { DataStream } from './data-stream.js'
 
 export class FrameHeader {
   dimX = 0
   dimY = 0
   numComp = 0
   precision = 0
-  components = []
+  components: Array<typeof ComponentSpec> = []
 
-  read = function (data) {
+  read(data: DataStream) {
     let count = 0
     let temp
 

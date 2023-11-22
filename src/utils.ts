@@ -1,6 +1,8 @@
+type NestedArray<T> = Array<T | NestedArray<T>>
+
 // https://stackoverflow.com/a/12588826
-export const createArray = (...dimensions) => {
-  if (dimensions.length > 0) {
+export const createArray = (...dimensions: number[]): NestedArray<number> => {
+  if (dimensions.length > 1) {
     const dim = dimensions[0]
     const rest = dimensions.slice(1)
     const newArray = []
@@ -9,7 +11,7 @@ export const createArray = (...dimensions) => {
     }
     return newArray
   } else {
-    return undefined
+    return Array(dimensions[0]).fill(undefined)
   }
 }
 
@@ -29,8 +31,8 @@ export const makeCRCTable = function () {
 
 export const crcTable = makeCRCTable()
 
-export const crc32 = function (dataView) {
-  const uint8view = new Uint8Array(dataView.buffer)
+export const crc32 = function (buffer: ArrayBuffer) {
+  const uint8view = new Uint8Array(buffer)
   let crc = 0 ^ -1
 
   for (let i = 0; i < uint8view.length; i++) {

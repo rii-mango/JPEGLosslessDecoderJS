@@ -1,3 +1,4 @@
+import { DataStream } from './data-stream.js'
 import { ScanComponent } from './scan-component.js'
 
 export class ScanHeader {
@@ -6,9 +7,9 @@ export class ScanHeader {
   numComp = 0 // Number of components in the scan
   selection = 0 // Start of spectral or predictor selection
   spectralEnd = 0 // End of spectral selection
-  components = []
+  components: Array<typeof ScanComponent> = []
 
-  read(data) {
+  read(data: DataStream) {
     let count = 0
     let i
     let temp

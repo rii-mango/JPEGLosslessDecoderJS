@@ -1,11 +1,9 @@
 export class DataStream {
-  constructor(data, offset, length) {
-    if (offset === undefined && length === undefined) {
-      // Old api
-      this.buffer = new Uint8Array(data)
-    } else {
-      this.buffer = new Uint8Array(data, offset, length)
-    }
+  buffer: Uint8Array
+  index: number
+
+  constructor(data: ArrayBuffer, offset?: number, length?: number) {
+    this.buffer = new Uint8Array(data, offset, length)
     this.index = 0
   }
 
