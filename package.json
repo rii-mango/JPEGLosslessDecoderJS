@@ -1,6 +1,6 @@
 {
   "name": "jpeg-lossless-decoder-js",
-  "version": "2.0.7",
+  "version": "2.1.0",
   "description": "A JavaScript JPEG Lossless decoder.",
   "main": "build/main.js",
   "types": "build/main.d.ts",
@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rii-mango/JPEGLosslessDecoderJS.git"
+    "url": "git+https://github.com/rii-mango/JPEGLosslessDecoderJS.git"
   },
   "keywords": [
     "JavaScript",
