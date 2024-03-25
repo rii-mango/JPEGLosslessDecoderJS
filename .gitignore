@@ -3,3 +3,5 @@ node_modules/
 .idea/
 release.sh
 .DS_Store
+*.d.cts
+*.js.map
