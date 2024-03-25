@@ -21,6 +21,9 @@
     "typescript": "^5.4.3",
     "vitest": "^1.4.0"
   },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.13.0"
+  },
   "scripts": {
     "test": "vitest run",
     "build": "tsup",
