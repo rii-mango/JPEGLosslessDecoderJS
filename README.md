@@ -26,8 +26,8 @@ var output = decoder.decompress(buffer [, offset [, length]]);
 ### Install
 Get a packaged source file from the [release folder](https://github.com/rii-mango/JPEGLosslessDecoderJS/tree/master/release):
 
-* [lossless.js](https://raw.githubusercontent.com/rii-mango/JPEGLosslessDecoderJS/master/release/current/lossless.js)
-* [lossless-min.js](https://raw.githubusercontent.com/rii-mango/JPEGLosslessDecoderJS/master/release/current/lossless-min.js)
+* [lossless.js](https://raw.githubusercontent.com/rii-mango/JPEGLosslessDecoderJS/master/release/lossless.js)
+* [lossless-min.js](https://raw.githubusercontent.com/rii-mango/JPEGLosslessDecoderJS/master/release/lossless-min.js)
 
 Or install via [NPM](https://www.npmjs.com/):
 
@@ -44,7 +44,7 @@ npm test
 ```
 npm run build
 ```
-This will output lossless.js and lossless-min.js to build/
+This will output `lossless.js` and `lossless-min.js` alongside declaration files and source maps to `/release`.
 
 ### Acknowledgments
 This decoder was originally written by Helmut Dersch for Java.  I added support for selection values 2 through 7, contributed bug fixes and ported to JavaScript.
