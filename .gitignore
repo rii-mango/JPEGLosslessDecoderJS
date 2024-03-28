@@ -6,3 +6,4 @@ release.sh
 *.d.cts
 *.d.ts
 *.js.map
+*.cjs.map
