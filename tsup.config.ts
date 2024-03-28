@@ -8,6 +8,8 @@ export default defineConfig([
     outExtension: () => ({
       js: '.js'
     }),
+    target: 'esnext',
+    format: 'esm',
     outDir: 'release',
     splitting: false,
     sourcemap: true,
@@ -21,11 +23,25 @@ export default defineConfig([
     outExtension: () => ({
       js: '.js'
     }),
+    target: 'esnext',
+    format: 'esm',
     outDir: 'release',
     splitting: false,
     sourcemap: true,
     clean: false,
     minify: true,
+    dts: true
+  },
+  {
+    entry: {
+      lossless: 'src/main.ts'
+    },
+    target: 'esnext',
+    format: 'cjs',
+    outDir: 'release/cjs',
+    splitting: false,
+    sourcemap: true,
+    clean: true,
     dts: true
   }
 ])
