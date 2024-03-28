@@ -2,9 +2,10 @@
   "name": "jpeg-lossless-decoder-js",
   "version": "2.1.0",
   "description": "A JavaScript JPEG Lossless decoder.",
-  "main": "release/lossless.js",
-  "types": "release/lossless.d.cts",
   "type": "module",
+  "main": "release/cjs/lossless.cjs",
+  "module": "release/lossless.js",
+  "types": "release/lossless.d.ts",
   "directories": {
     "test": "tests"
   },

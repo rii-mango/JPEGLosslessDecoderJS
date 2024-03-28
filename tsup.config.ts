@@ -31,5 +31,17 @@ export default defineConfig([
     clean: false,
     minify: true,
     dts: true
+  },
+  {
+    entry: {
+      lossless: 'src/main.ts'
+    },
+    target: 'esnext',
+    format: 'cjs',
+    outDir: 'release/cjs',
+    splitting: false,
+    sourcemap: true,
+    clean: true,
+    dts: true
   }
 ])
