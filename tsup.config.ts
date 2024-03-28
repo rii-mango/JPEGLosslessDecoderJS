@@ -8,6 +8,8 @@ export default defineConfig([
     outExtension: () => ({
       js: '.js'
     }),
+    target: 'esnext',
+    format: 'esm',
     outDir: 'release',
     splitting: false,
     sourcemap: true,
@@ -21,6 +23,8 @@ export default defineConfig([
     outExtension: () => ({
       js: '.js'
     }),
+    target: 'esnext',
+    format: 'esm',
     outDir: 'release',
     splitting: false,
     sourcemap: true,
