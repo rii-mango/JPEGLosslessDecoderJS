@@ -228,16 +228,14 @@ export class Decoder {
       this.numComp = this.scan.numComp
       this.selection = this.scan.selection
 
-      if (this.numBytes === 1) {
-        if (this.numComp === 3) {
-          this.getter = this.getValueRGB
-          this.setter = this.setValueRGB
-          this.output = this.outputRGB
-        } else {
-          this.getter = this.getValue8
-          this.setter = this.setValue8
-          this.output = this.outputSingle
-        }
+      // How many components the scan carries decides the layout, not how wide a
+      // sample is: `decodeUnit` dispatches on numComp alone, so a 16 bit colour
+      // scan used to decode three components and write them through the single
+      // component output, which only ever wrote the first
+      if (this.numComp === 3) {
+        this.getter = this.getValueRGB
+        this.setter = this.setValueRGB
+        this.output = this.outputRGB
       } else {
         this.getter = this.getValue8
         this.setter = this.setValue8
@@ -295,7 +293,7 @@ export class Decoder {
         index[0] = 0
 
         for (i = 0; i < 10; i += 1) {
-          pred[i] = 1 << (this.precision - 1)
+          pred[i] = this.initialPrediction()
         }
 
         if (this.restartInterval === 0) {
@@ -340,7 +338,49 @@ export class Decoder {
       }
     } while (current !== 0xffd9 && this.xLoc < this.xDim && this.yLoc < this.yDim && scanNum === 0)
 
+    this.applyPointTransform()
+
     return this.outputData
+  }
+
+  /**
+   * The point transform Al (T.81 A.4, the low order bits the encoder discarded
+   * before encoding).
+   */
+  getPointTransform(): number {
+    return this.scan.al
+  }
+
+  /**
+   * Prediction for the first sample of a scan, and for the first sample after a
+   * restart marker: 2^(P - Pt - 1) per T.81 H.1.2.1. Seeding with 2^(P - 1)
+   * instead offsets every sample of the frame, because lossless prediction
+   * chains additively from this value.
+   */
+  initialPrediction(): number {
+    return 1 << (this.frame.precision - this.getPointTransform() - 1)
+  }
+
+  /**
+   * Scales the decoded samples back up by the point transform. The encoder
+   * right shifted them by Al before encoding (T.81 A.4.1), so a frame decoded
+   * without this keeps only 1/2^Al of its dynamic range.
+   *
+   * This runs once the whole frame is decoded rather than in `setValue`,
+   * because prediction reads previously decoded samples back out of
+   * `outputData` and those reads have to stay in the point transformed domain
+   * the arithmetic runs in.
+   */
+  applyPointTransform(): void {
+    const pointTransform = this.getPointTransform()
+
+    if (!pointTransform || !this.outputData) {
+      return
+    }
+
+    for (let i = 0; i < this.outputData.length; i += 1) {
+      this.outputData[i] = this.outputData[i] << pointTransform
+    }
   }
 
   decodeUnit(prev: number[], temp: number[], index: number[]): number {
@@ -381,50 +421,48 @@ export class Decoder {
     return (this.getPreviousX(compOffset) + this.getPreviousY(compOffset)) / 2
   }
 
+  /**
+   * Decodes one multi component sample of a lossless scan.
+   *
+   * This is `decodeSingle` applied to each component of an interleaved scan:
+   * every component keeps its own prediction, taken from its own neighbours
+   * through the selector, and contributes one Huffman coded difference per
+   * sample.
+   *
+   * It used to be a copy of the baseline DCT path - it read 63 AC coefficients
+   * per block against the AC Huffman table and multiplied by a quantization
+   * table. A lossless scan carries none of that, so after the first component's
+   * difference the entropy stream was read out of step and the remaining
+   * components never decoded: a colour frame came out with components 2 and 3
+   * stuck at the initial prediction (cornerstone3D#1116).
+   */
   decodeRGB(prev: number[], temp: number[], index: number[]) {
     if (this.selector === null) throw new Error("decode hasn't run yet")
 
-    let actab, dctab, qtab, ctrC, i, k, j
-
-    prev[0] = this.selector(0)
-    prev[1] = this.selector(1)
-    prev[2] = this.selector(2)
+    let ctrC, i
 
     for (ctrC = 0; ctrC < this.numComp; ctrC += 1) {
-      qtab = this.qTab[ctrC]
-      actab = this.acTab[ctrC]
-      dctab = this.dcTab[ctrC]
-      for (i = 0; i < this.nBlock[ctrC]; i += 1) {
-        for (k = 0; k < this.IDCT_Source.length; k += 1) {
-          this.IDCT_Source[k] = 0
-        }
+      prev[ctrC] = this.restarting ? this.initialPrediction() : this.selector(ctrC)
+    }
 
-        let value = this.getHuffmanValue(dctab, temp, index)
+    this.restarting = false
+
+    for (ctrC = 0; ctrC < this.numComp; ctrC += 1) {
+      for (i = 0; i < this.nBlock[ctrC]; i += 1) {
+        const value = this.getHuffmanValue(this.dcTab[ctrC], temp, index)
 
         if (value >= 0xff00) {
           return value
         }
 
-        prev[ctrC] = this.IDCT_Source[0] = prev[ctrC] + this.getn(index, value, temp, index)
-        this.IDCT_Source[0] *= qtab[0]
+        const n = this.getn(prev, value, temp, index, ctrC)
+        const nRestart = n >> 8
 
-        for (j = 1; j < 64; j += 1) {
-          value = this.getHuffmanValue(actab, temp, index)
-
-          if (value >= 0xff00) {
-            return value
-          }
-
-          j += value >> 4
-
-          if ((value & 0x0f) === 0) {
-            if (value >> 4 === 0) {
-              break
-            }
-          } else {
-            this.IDCT_Source[Decoder.IDCT_P[j]] = this.getn(index, value & 0x0f, temp, index) * qtab[j]
-          }
+        if (nRestart >= Decoder.RESTART_MARKER_BEGIN && nRestart <= Decoder.RESTART_MARKER_END) {
+          return nRestart
         }
+
+        prev[ctrC] += n
       }
     }
 
@@ -438,7 +476,7 @@ export class Decoder {
 
     if (this.restarting) {
       this.restarting = false
-      prev[0] = 1 << (this.frame.precision - 1)
+      prev[0] = this.initialPrediction()
     } else {
       prev[0] = this.selector()
     }
@@ -552,7 +590,7 @@ export class Decoder {
     return code & 0xff
   }
 
-  getn(PRED: number[], n: number, temp: number[], index: number[]) {
+  getn(PRED: number[], n: number, temp: number[], index: number[], compOffset = 0) {
     let result, input
     const one = 1
     const n_one = -1
@@ -565,7 +603,8 @@ export class Decoder {
     }
 
     if (n === 16) {
-      if (PRED[0] >= 0) {
+      // Each component of an interleaved scan predicts from its own value
+      if (PRED[compOffset] >= 0) {
         return -32768
       } else {
         return 32768
@@ -645,7 +684,7 @@ export class Decoder {
     } else if (this.yLoc > 0) {
       return this.getPreviousY(compOffset)
     } else {
-      return 1 << (this.frame.precision - 1)
+      return this.initialPrediction()
     }
   }
 
@@ -694,9 +733,11 @@ export class Decoder {
     const offset = this.yLoc * this.xDim + this.xLoc
 
     if (this.xLoc < this.xDim && this.yLoc < this.yDim) {
-      this.setter(offset, PRED[0], 0)
-      this.setter(offset, PRED[1], 1)
-      this.setter(offset, PRED[2], 2)
+      // Masked like the single component path: lossless prediction is modulo
+      // 2^P, so a sample that wrapped has to be brought back into range
+      this.setter(offset, this.mask & PRED[0], 0)
+      this.setter(offset, this.mask & PRED[1], 1)
+      this.setter(offset, this.mask & PRED[2], 2)
 
       this.xLoc += 1
 
