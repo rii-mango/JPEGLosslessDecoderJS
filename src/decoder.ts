@@ -31,6 +31,15 @@ export class Decoder {
   static RESTART_MARKER_BEGIN = 0xffd0
   static RESTART_MARKER_END = 0xffd7
 
+  // Value `markerIndex` takes once the 0xFF that introduces a marker has been
+  // shifted into `temp`. Only `!== 0` is ever tested - see `readPastEntropyData`
+  // for what the bit count itself means.
+  static MARKER_SEEN = 9
+
+  // How many bits of `temp` that 0xFF occupies. Bits below it are the marker,
+  // not entropy coded data.
+  static MARKER_BITS = 8
+
   buffer: ArrayBuffer | null = null
   stream: DataStream | null = null
   frame = new FrameHeader()
@@ -505,7 +514,7 @@ export class Decoder {
       if (input === 0xff) {
         this.marker = this.stream.get8()
         if (this.marker !== 0) {
-          this.markerIndex = 9
+          this.markerIndex = Decoder.MARKER_SEEN
         }
       }
       temp[0] |= input
@@ -528,7 +537,7 @@ export class Decoder {
       if (input === 0xff) {
         this.marker = this.stream.get8()
         if (this.marker !== 0) {
-          this.markerIndex = 9
+          this.markerIndex = Decoder.MARKER_SEEN
         }
       }
 
@@ -543,7 +552,7 @@ export class Decoder {
       throw new Error('index=' + index[0] + ' temp=' + temp[0] + ' code=' + code + ' in HuffmanValue()')
     }
 
-    if (index[0] < this.markerIndex) {
+    if (this.readPastEntropyData(index)) {
       this.markerIndex = 0
       return 0xff00 | this.marker
     }
@@ -575,8 +584,7 @@ export class Decoder {
     index[0] -= n
 
     if (index[0] >= 0) {
-      if (index[0] < this.markerIndex && !this.isLastPixel()) {
-        // this was corrupting the last pixel in some cases
+      if (this.readPastEntropyData(index)) {
         this.markerIndex = 0
         return (0xff00 | this.marker) << 8
       }
@@ -590,7 +598,7 @@ export class Decoder {
       if (input === 0xff) {
         this.marker = this.stream.get8()
         if (this.marker !== 0) {
-          this.markerIndex = 9
+          this.markerIndex = Decoder.MARKER_SEEN
         }
       }
 
@@ -609,7 +617,7 @@ export class Decoder {
         if (input === 0xff) {
           this.marker = this.stream.get8()
           if (this.marker !== 0) {
-            this.markerIndex = 9
+            this.markerIndex = Decoder.MARKER_SEEN
           }
         }
 
@@ -621,7 +629,7 @@ export class Decoder {
         throw new Error('index=' + index[0] + ' in getn()')
       }
 
-      if (index[0] < this.markerIndex) {
+      if (this.readPastEntropyData(index)) {
         this.markerIndex = 0
         return (0xff00 | this.marker) << 8
       }
@@ -669,8 +677,26 @@ export class Decoder {
     }
   }
 
-  isLastPixel() {
-    return this.xLoc === this.xDim - 1 && this.yLoc === this.yDim - 1
+  /**
+   * True when the bits just consumed came out of a marker rather than out of
+   * the entropy coded segment.
+   *
+   * `temp` holds `index` unconsumed bits (see the `getHuffmanValue` notes). The
+   * moment `getHuffmanValue`/`getn` shifts in a byte that turns out to be the
+   * 0xFF introducing a marker, those 8 bits stop being data: only the
+   * `index - MARKER_BITS` bits above them are real, and the scan is over once
+   * they run out.
+   *
+   * Consuming the last real bit leaves `index === MARKER_BITS`, and that is
+   * still a valid decode - it is a scan whose final Huffman code ends exactly
+   * on a byte boundary, so the encoder had no partial byte left to pad (T.81
+   * B.1.1.2 pads only an incomplete final byte). Testing `index < markerIndex`
+   * rejected that case and dropped the frame's last sample, which is what
+   * DCMTK produces when a frame ends in a long run of one value: the run's
+   * short codes tile the final byte exactly.
+   */
+  readPastEntropyData(index: number[]): boolean {
+    return this.markerIndex !== 0 && index[0] < Decoder.MARKER_BITS
   }
 
   outputSingle(PRED: number[]) {
